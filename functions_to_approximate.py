@@ -99,7 +99,7 @@ def neuzz_fn(a, b):
     else:
         return 3
 
-def fahrenheit_to_celcius_fn(x):
+def fahrenheit_to_celcius_disc_fn(x):
     c = (5/9) * (x-32)
     if c < 0:
         return 0
