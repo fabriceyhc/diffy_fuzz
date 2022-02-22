@@ -12,7 +12,7 @@ def square_fn(x):
     return x**2
 
 def log_fn(x):
-    return np.log(x)
+    return np.log(abs(x))
 
 def poly_fn(x):
     return 20*x + 3*x**2 + 0.1*x**3
@@ -82,7 +82,7 @@ def square_disc_fn(x):
         return 1
 
 def log_disc_fn(x):
-    z = np.log(x)
+    z = np.log(abs(x))
     if z < 1:
         return 0
     else:
