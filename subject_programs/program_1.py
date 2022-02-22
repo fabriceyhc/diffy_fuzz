@@ -1,12 +1,22 @@
 import sys
 import os
+import argparse
 
 sys.path.insert(1, os.path.abspath("."))
 
 from functions_to_approximate import sin_fn
 
 if __name__ == '__main__':
-   x = float(input("Enter a numeric value for sin_fn(x):"))
+
+   parser = argparse.ArgumentParser()
+   parser.add_argument("--input", type=float, help="value to pass into sin_fn()")
+   args = parser.parse_args()
+
+   x = args.input
+
+   if not args.input:
+      x = float(input("Enter a numeric value for sin_fn(x):"))
+
    y = sin_fn(x)
    
    if y > 0:
