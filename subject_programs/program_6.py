@@ -1,8 +1,4 @@
-import sys
-import os
 import argparse
-
-sys.path.insert(1, os.path.abspath("."))
 
 from functions_to_approximate import fahrenheit_to_celcius_fn
 
@@ -27,5 +23,5 @@ if __name__ == '__main__':
       print("You also have ice!")
 
    # x ~ 212
-   if y == 100:
+   if round(y, 0) == 100:
       raise Exception("You found a hard-to-reach bug (and steam)!")

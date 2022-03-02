@@ -1,8 +1,4 @@
-import sys
-import os
 import argparse
-
-sys.path.insert(1, os.path.abspath("."))
 
 from functions_to_approximate import pythagorean_fn
 

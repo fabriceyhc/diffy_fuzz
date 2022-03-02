@@ -1,8 +1,4 @@
-import sys
-import os
 import argparse
-
-sys.path.insert(1, os.path.abspath("."))
 
 from functions_to_approximate import poly_fn
 
@@ -28,5 +24,5 @@ if __name__ == '__main__':
       print("poly_fn returned zero!")
 
    # x ~ 0.5
-   if y == 10.7625:
+   if round(y, 4) == 10.7625:
       raise Exception("You found a hard-to-reach bug!")
