@@ -96,7 +96,7 @@ fn(x_adv): tensor([100.1487])
 ```
 Running the program with this value results in:
  ```
->python subject_programs\program_6.py --input 212.2676
+> python subject_programs\program_6.py --input 212.2676
 You've got water!
 Traceback (most recent call last):
   File "C:\Users\fabriceyhc\Documents\GitHub\diffy_fuzz\src\subject_programs\program_6.py", line 27, in <module>
