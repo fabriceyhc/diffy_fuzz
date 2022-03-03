@@ -98,3 +98,20 @@ class DatasetGenerator:
         test_loader  = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
         return train_loader, test_loader
+
+
+if __name__ == '__main__':
+
+    from subject_programs.functions_to_approximate import square_fn
+    from function_approximator import MinMaxScaler
+
+    dg = DatasetGenerator(square_fn)
+    train_loader, test_loader = dg(
+        scaler=MinMaxScaler, 
+        num_examples_per_arg = 1000, 
+        max_dataset_size = 1000, 
+        batch_size=2, 
+        fuzz_generate=False)
+
+    print('train_loader:', next(iter(train_loader)))
+    print('test_loader:', next(iter(test_loader)))
