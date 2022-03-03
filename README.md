@@ -43,12 +43,8 @@ For an example of this substep, see the [code](src/dataset_generator.py) or run 
 ```
 This outputs a sample of both the training / testing data for the `square_fn`:
 ```
-train_loader: [tensor([[0.3263],
-        [0.5265]]), tensor([[0.1206],
-        [0.0028]])]
-test_loader: [tensor([[0.1231],
-        [0.2813]]), tensor([[0.5681],
-        [0.1914]])]
+train_loader: [tensor([[0.3263],[0.5265]]), tensor([[0.1206],[0.0028]])]
+test_loader: [tensor([[0.1231],[0.2813]]), tensor([[0.5681],[0.1914]])]
 ```
 
 Now that we have a model and a dataset, it's training time! We use `pytorch-lightning` to greatly simplify this process. Even without a GPU, most of our studied functions can be well approximated in 1-3 seconds when trained on 900 datapoints for 3 epochs. 
