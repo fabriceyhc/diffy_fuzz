@@ -52,7 +52,7 @@ Now that we have a model and a dataset, it's training time! We use `pytorch-ligh
 For example, the following command yields:
 
 ```
-python function_approximator.py
+> python function_approximator.py
 ```
 
 |index|fn\_name|type|test\_loss|test\_acc|train\_time_in_sec|
