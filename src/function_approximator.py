@@ -5,7 +5,6 @@ from torch.optim import Adam
 
 import torchmetrics
 
-from pytorch_lightning import Trainer
 from pytorch_lightning.core.lightning import LightningModule
 
 class FuncApproximator(LightningModule):
@@ -122,3 +121,100 @@ class MinMaxScaler(object):
         tensor /= self.scale_
         tensor += self.min_
         return tensor
+
+
+if __name__ == '__main__':
+
+    import time
+    import torch
+    import pandas as pd
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    from pytorch_lightning import Trainer
+
+    from subject_programs.functions_to_approximate import *
+    from dataset_generator import *
+    from function_approximator import *
+
+    fns = [
+          sin_fn, 
+          square_fn, 
+          log_fn, 
+          poly_fn,
+          pythagorean_fn, 
+          fahrenheit_to_celcius_fn, 
+          dl_textbook_fn, 
+          square_disc_fn, 
+          log_disc_fn, 
+          neuzz_fn, 
+          fahrenheit_to_celcius_disc_fn,
+          log_sin_fn,
+          f_of_g_fn,
+          arcsin_sin_fn
+    ]
+
+    results = []
+    for fg in [False]: # [True, False]
+       for fn in fns:
+
+           dg = DatasetGenerator(fn)
+
+           train_loader, test_loader = dg(
+               scaler=MinMaxScaler if dg.num_outputs == 1 else None, 
+               num_examples_per_arg = 1000, 
+               max_dataset_size = 1000, 
+               batch_size=10, 
+               fuzz_generate=False)
+
+           model = FuncApproximator(
+               input_size=dg.num_inputs,
+               output_size=dg.num_outputs)
+           
+           trainer = Trainer(
+               max_epochs=3,
+               gpus=torch.cuda.device_count()
+           )
+
+           tic = time.perf_counter()
+           trainer.fit(model, train_loader)
+           toc = time.perf_counter()
+
+           if 'x_scaler' in dg.__dict__:
+               model.x_scaler = dg.x_scaler
+           if 'y_scaler' in dg.__dict__:
+               model.y_scaler = dg.y_scaler
+
+           out = trainer.test(model, test_loader)[0]
+           out['model'] = model
+           out['dg'] = dg
+           out['train_loader'] = train_loader
+           out['test_loader'] = test_loader
+           out['fn'] = fn
+           out['fn_name'] = fn.__name__
+           if 'test_acc' not in out:
+               out['test_acc'] = 'NA'
+           out['train_time_in_sec'] = toc - tic
+           out['type'] = 'continous' if dg.num_outputs == 1 else 'discontinous'
+           out['fuzz_generate'] = fg
+           
+           results.append(out)
+
+    df = pd.DataFrame(results)
+    display_cols = ['fn_name', 'type', 'test_loss', 'test_acc', 'train_time_in_sec', 'fuzz_generate']
+    print(df[display_cols])
+
+
+    for result in results:
+       if result['test_acc'] != 'NA' or result['dg'].num_inputs > 1:
+           continue
+
+       x, y_true = result['test_loader'].dataset[:]
+       x = result['model'].x_scaler.inverse_transform(x)
+       y_true = result['model'].y_scaler.inverse_transform(y_true)
+       y_pred = result['model'].predict(x)
+
+       g = sns.lineplot(x=x.view(-1), y=y_true.view(-1))
+       g = sns.lineplot(x=x.view(-1), y=y_pred.view(-1).detach())
+       plt.title(result['fn_name'] + ' | Fuzz Generate: ' + repr(result['fuzz_generate']))
+
+       plt.show()
