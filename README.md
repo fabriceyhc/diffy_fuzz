@@ -21,11 +21,11 @@ Additional details for each phase can be seen in the following flow chart.
 
 ### Initializing the coverage profile
 
-TODO: Apoorv, briefly describe your approach and provide runnable code snippet. Include data you provide to step 2 for Aish.
+TODO: Apoorv, describe your approach and provide runnable code snippet. Include data you provide to step 2 for Aish.
 
 ### Identifying blocking code
 
-TODO: Aish, briefly describe your approach and provide runnable code snippet. Include data you provide to step 3-4 for Fabrice.
+TODO: Aish, describe your approach and provide runnable code snippet. Include data you provide to step 3-4 for Fabrice.
 
 ### Function Approximation
 
