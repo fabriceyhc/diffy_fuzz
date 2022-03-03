@@ -39,16 +39,16 @@ Once we have identified the blocking code, we must then approximate it different
 
 For an example of this substep, see the [code](src/dataset_generator.py) or run this command:
 ```
-python dataset_generatory.py
+> python dataset_generatory.py
 ```
 This outputs a sample of both the training / testing data for the `square_fn`:
 ```
-> train_loader: [tensor([[0.3263],
->         [0.5265]]), tensor([[0.1206],
->         [0.0028]])]
-> test_loader: [tensor([[0.1231],
->         [0.2813]]), tensor([[0.5681],
->         [0.1914]])]
+train_loader: [tensor([[0.3263],
+        [0.5265]]), tensor([[0.1206],
+        [0.0028]])]
+test_loader: [tensor([[0.1231],
+        [0.2813]]), tensor([[0.5681],
+        [0.1914]])]
 ```
 
 Now that we have a model and a dataset, it's training time! We use `pytorch-lightning` to greatly simplify this process. Even without a GPU, most of our studied functions can be well approximated in 1-3 seconds when trained on 900 datapoints for 3 epochs. 
@@ -80,4 +80,26 @@ python function_approximator.py
 
 ### Generating Inputs
 
-TODO: FHC
+Now that we have a fitted approximator, we can use gradient-optimization techniques to generate an input that satisfies the constraints for the uncovered branches. For this, we repurpose a projected gradient descent (PGD) algorithm originally developed for adversarial attacks. The attack is unbounded so that the seed input can be perturbed as far as necessary to generate the target inputs. 
+
+The following code runs through a full example where the target function is `fahrenheit_to_celcius_fn`. If the rounded output of this function is 100, then it reaches a bug (see [subject_programs/program_6](/src/subject_programs/program_6.py)). The testing goal is to find an input that causes `fahrenheit_to_celcius_fn` to output 100.
+
+```
+> python pgd.py
+```
+This trains a model, then uses PGD to arrive at a value that accesses the branch and will discover the bug!
+
+```
+x_adv: tensor([[212.2676]])
+target: 100
+fn(x_adv): tensor([100.1487])
+```
+Running the program with this value results in:
+ ```
+>python subject_programs\program_6.py --input 212.2676
+You've got water!
+Traceback (most recent call last):
+  File "C:\Users\fabriceyhc\Documents\GitHub\diffy_fuzz\src\subject_programs\program_6.py", line 27, in <module>
+    raise Exception("You found a hard-to-reach bug (and steam)!")
+Exception: You found a hard-to-reach bug (and steam)!
+ ```
