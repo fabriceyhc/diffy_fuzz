@@ -15,7 +15,7 @@ At a high-level, there are four primary phases to our approach:
 
 These generated inputs are specifically designed to satisfy uncovered branch conditions and improve coverage. 
 
-Additional details for each phase can be seen in the following flow chart.
+Additional details for each phase can be seen in this flow chart and in the following subsections.
 
 ![DiffyFuzz Overview](/imgs/overview.png?raw=true)
 
