@@ -76,7 +76,7 @@ python function_approximator.py
 |12|f\_of_g_fn|discontinous|1\.43994e-06|1|1\.66|false|
 |13|arcsin\_sin_fn|discontinous|7\.15119e-06|1|1\.62|false|
 
-![log_fn](/imgs/log_fn.png?raw=true)  ![square_fn](/imgs/square_fn.png?raw=true)  ![sin_fn](/imgs/sin_fn.png?raw=true)  ![dl_textbook_fn](/imgs/dl_textbook_fn.png?raw=true)  ![poly_fn](/imgs/poly_fn.png?raw=true)  ![fahrenheit_to_celcius_fn](/imgs/fahrenheit_to_celcius_fn.png?raw=true)
+![sin_fn](/imgs/sin_fn.png?raw=true) ![square_fn](/imgs/square_fn.png?raw=true) ![log_fn](/imgs/log_fn.png?raw=true) ![poly_fn](/imgs/poly_fn.png?raw=true)          ![fahrenheit_to_celcius_fn](/imgs/fahrenheit_to_celcius_fn.png?raw=true) ![dl_textbook_fn](/imgs/dl_textbook_fn.png?raw=true)
 
 ### Generating Inputs
 
