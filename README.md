@@ -74,7 +74,7 @@ python function_approximator.py
 
 ![sin_fn](/imgs/sin_fn.png?raw=true) ![square_fn](/imgs/square_fn.png?raw=true) ![log_fn](/imgs/log_fn.png?raw=true) ![poly_fn](/imgs/poly_fn.png?raw=true)          ![fahrenheit_to_celcius_fn](/imgs/fahrenheit_to_celcius_fn.png?raw=true) ![dl_textbook_fn](/imgs/dl_textbook_fn.png?raw=true)
 
-As you can see, some functions are not especially well approximated. The `sin_fn` is especially challenging for neural networks and in the future we may want to incorporate fallback approximators such as a [taylor polynomial](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.approximate_taylor_polynomial.html). Other functions, like the `log_fn` are well approximated only for certain ranges of the input space, but may still provide enough guidance for gradient optimization to solve coarse-grained inequality constraints. 
+As you can see, some functions are not especially well approximated. The `sin_fn` is especially challenging for neural networks and in the future we may want to incorporate fallback approximators such as a [taylor polynomial](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.approximate_taylor_polynomial.html). Other functions, like the `log_fn`, are well approximated only for certain ranges of the input space, but may still provide enough guidance for gradient optimization to solve coarse-grained inequality constraints. 
 
 ### Generating Inputs
 
