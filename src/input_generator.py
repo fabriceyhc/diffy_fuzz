@@ -7,6 +7,79 @@ from collections import deque
 from cleverhans.torch.utils import clip_eta
 from cleverhans.torch.utils import optimize_linear
 
+class GradientInputGenerator:
+    def __init__(self, 
+                 eps=1., 
+                 eps_iter=0.1, 
+                 nb_iter=1000, 
+                 norm=2,
+                 objective_scaler=100):
+      
+        self.eps = eps
+        self.eps_iter = eps_iter
+        self.nb_iter = nb_iter
+        self.norm = norm
+        self.objective_scaler = objective_scaler
+
+    def __call__(self, 
+                 model,
+                 target,
+                 objective,
+                 seed=None):
+      
+        if not seed:
+            # create default seed at midpoint in input space [0,1]
+            seed = torch.full((1, model.input_size), 0.5)
+        else:
+            # scale provided input seed for model
+            seed = model.x_scaler.transform(seed)
+
+        # set target objective for pgd
+        if objective == ">":
+            # --> make larger
+            target_objective = target * self.objective_scaler
+        elif objective == "<":
+            # --> make smaller
+            target_objective = target / self.objective_scaler
+        elif objective == "==":
+            # --> equal the target value
+            target_objective = target
+        else:
+            raise ValueError("Unhandled objective!")
+
+        target = torch.full((1, model.output_size), target_objective)
+
+        # loss function + target transform based on model output 
+        if model.output_size == 1:
+            loss_fn = F.l1_loss  
+            target  = model.y_scaler.transform(target)
+        else:
+            loss_fn = F.cross_entropy
+            target  = target.reshape(-1).long()
+
+        # generate input via pgd
+        x_adv = projected_gradient_descent(
+            model_fn=model,
+            x=seed,
+            y=target,
+            targeted=True,
+            loss_fn=loss_fn,
+            eps=self.eps,
+            eps_iter=self.eps_iter, 
+            nb_iter=self.nb_iter,
+            norm=self.norm,
+            clip_min=0,
+            clip_max=1,
+            rand_init=True,
+            rand_minmax=None,
+            sanity_checks=False,
+            early_stopping=True
+        ).detach()
+
+        x_adv = model.x_scaler.inverse_transform(x_adv)
+
+        return x_adv
+
 def fast_gradient_method(
     model_fn,
     x,
@@ -220,7 +293,8 @@ def projected_gradient_descent(
         # Using model predictions as ground truth to avoid label leaking
         _, y = torch.max(model_fn(x), 1)
 
-    prev_advs = deque([], 5)
+    if early_stopping:
+        prev_advs = deque([], 5)
 
     i = 0
     while i < nb_iter:
@@ -236,13 +310,14 @@ def projected_gradient_descent(
             loss_fn=loss_fn
         )
 
-        if early_stopping and adv_x in prev_advs:
-            eps_iter /= 2.
-            prev_advs.clear()
-            if eps_iter < 1e-10:
-                break
-        else:
-            prev_advs.append(adv_x)
+        if early_stopping:
+            if adv_x in prev_advs:
+                eps_iter /= 2.
+                prev_advs.clear()
+                if eps_iter < 1e-10:
+                    break
+            else:
+                prev_advs.append(adv_x.detach())
 
         # Clipping perturbation eta to norm norm ball
         eta = adv_x - x
@@ -302,42 +377,10 @@ if __name__ == '__main__':
         model.y_scaler = dg.y_scaler
 
     # generate target input
-    eps=1
-    eps_iter=0.01
-    nb_iter=1000
-    norm=2
-
     target = 100
+    objective = "=="
 
-    x = torch.tensor([[0.]])
-
-    if dg.num_outputs == 1:
-        loss_fn = F.l1_loss  # F.mse_loss F.l1_loss
-        targets = torch.full_like(x, target)
-        targets = model.y_scaler.transform(targets)
-    else:
-        loss_fn = F.cross_entropy
-        targets = torch.full_like(x, target).reshape(-1).long()
-
-    x_adv = projected_gradient_descent(
-        model_fn=model,
-        x=x,
-        eps=eps,
-        eps_iter=eps_iter, 
-        nb_iter=nb_iter,
-        norm=norm,
-        clip_min=0,
-        clip_max=1,
-        y=targets,
-        targeted=True,
-        rand_init=False,
-        rand_minmax=None,
-        sanity_checks=False,
-        loss_fn=loss_fn,
-        early_stopping=True
-    ).detach()
-
-    x_adv = model.x_scaler.inverse_transform(x_adv)
+    x_adv = GradientInputGenerator()(model, target, objective)
 
     print('x_adv:', x_adv)
     print('target:', target)

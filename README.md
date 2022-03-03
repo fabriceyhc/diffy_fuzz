@@ -83,7 +83,7 @@ Now that we have a fitted approximator, we can use gradient-optimization techniq
 The following code runs through a full example where the target function is `fahrenheit_to_celcius_fn`. If the rounded output of this function is 100, then it reaches a bug (see [subject_programs/program_6](/src/subject_programs/program_6.py)). The testing goal is to find an input that causes `fahrenheit_to_celcius_fn` to output 100.
 
 ```
-> python pgd.py
+> python input_generator.py
 ```
 This trains a model, then uses PGD to arrive at a value that accesses the branch and will discover the bug!
 
