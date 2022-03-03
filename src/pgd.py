@@ -1,4 +1,6 @@
 import torch
+from torch.nn import functional as F
+
 import numpy as np
 from collections import deque
 
@@ -15,8 +17,7 @@ def fast_gradient_method(
     y=None,
     targeted=False,
     sanity_checks=False,
-    loss_fn=F.cross_entropy,
-    is_classification=True
+    loss_fn=F.cross_entropy
 ):
     """
     PyTorch implementation of the Fast Gradient Method.
@@ -82,7 +83,7 @@ def fast_gradient_method(
     out = model_fn(x)
     loss = loss_fn(out, y)
     # If attack is targeted, minimize loss of target label rather than maximize loss of correct label
-    if targeted: # and is_classification:
+    if targeted: 
         loss = -loss
 
     # Define gradient of loss wrt input
@@ -91,7 +92,7 @@ def fast_gradient_method(
 
     # Add perturbation to original example to obtain adversarial example
     adv_x = x + optimal_perturbation
-    print(x, optimal_perturbation, out, loss)
+    # print(x, optimal_perturbation, out, loss)
 
     # If clipping is needed, reset all values outside of [clip_min, clip_max]
     if (clip_min is not None) or (clip_max is not None):
@@ -120,7 +121,6 @@ def projected_gradient_descent(
     rand_minmax=None,
     sanity_checks=True,
     loss_fn=F.cross_entropy,
-    is_classification=True,
     early_stopping=True
 ):
     """
@@ -239,7 +239,7 @@ def projected_gradient_descent(
         if early_stopping and adv_x in prev_advs:
             eps_iter /= 2.
             prev_advs.clear()
-            if eps_iter < 1e-6:
+            if eps_iter < 1e-10:
                 break
         else:
             prev_advs.append(adv_x)
@@ -264,3 +264,81 @@ def projected_gradient_descent(
     if sanity_checks:
         assert np.all(asserts)
     return adv_x
+
+if __name__ == '__main__':
+
+    from pytorch_lightning import Trainer
+
+    from subject_programs.functions_to_approximate import fahrenheit_to_celcius_fn
+    from dataset_generator import *
+    from function_approximator import *
+
+    fn = fahrenheit_to_celcius_fn
+
+    # train approximator
+    dg = DatasetGenerator(fn)
+
+    train_loader, test_loader = dg(
+        scaler=MinMaxScaler, 
+        num_examples_per_arg = 1000, 
+        max_dataset_size = 1000, 
+        batch_size=10, 
+        fuzz_generate=False)
+
+    model = FuncApproximator(
+        input_size=dg.num_inputs,
+        output_size=dg.num_outputs)
+
+    trainer = Trainer(
+        max_epochs=3,
+        gpus=torch.cuda.device_count()
+    )
+    trainer.fit(model, train_loader)
+    # trainer.test(model, test_loader)
+
+    if 'x_scaler' in dg.__dict__:
+        model.x_scaler = dg.x_scaler
+    if 'y_scaler' in dg.__dict__:
+        model.y_scaler = dg.y_scaler
+
+    # generate target input
+    eps=1
+    eps_iter=0.01
+    nb_iter=5000
+    norm=2
+
+    target = 100
+
+    x = torch.tensor([[0.]])
+
+    if dg.num_outputs == 1:
+        loss_fn = F.l1_loss  # F.mse_loss F.l1_loss
+        targets = torch.full_like(x, target)
+        targets = model.y_scaler.transform(targets)
+    else:
+        loss_fn = F.cross_entropy
+        targets = torch.full_like(x, target).reshape(-1).long()
+
+    x_adv = projected_gradient_descent(
+        model_fn=model,
+        x=x,
+        eps=eps,
+        eps_iter=eps_iter, 
+        nb_iter=nb_iter,
+        norm=norm,
+        clip_min=0,
+        clip_max=1,
+        y=targets,
+        targeted=True,
+        rand_init=False,
+        rand_minmax=None,
+        sanity_checks=False,
+        loss_fn=loss_fn,
+        early_stopping=True
+    ).detach()
+
+    x_adv = model.x_scaler.inverse_transform(x_adv)
+
+    print('x_adv:', x_adv)
+    print('target:', target)
+    print('fn(x_adv):', fn(*x_adv))
