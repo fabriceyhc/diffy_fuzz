@@ -304,7 +304,7 @@ if __name__ == '__main__':
     # generate target input
     eps=1
     eps_iter=0.01
-    nb_iter=5000
+    nb_iter=1000
     norm=2
 
     target = 100
