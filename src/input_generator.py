@@ -13,18 +13,18 @@ class GradientInputGenerator:
                  eps_iter=0.1, 
                  nb_iter=1000, 
                  norm=2,
-                 objective_scaler=100):
+                 op_scaler=100):
       
         self.eps = eps
         self.eps_iter = eps_iter
         self.nb_iter = nb_iter
         self.norm = norm
-        self.objective_scaler = objective_scaler
+        self.op_scaler = op_scaler
 
     def __call__(self, 
                  model,
                  target,
-                 objective,
+                 op,
                  seed=None):
       
         if not seed:
@@ -34,22 +34,22 @@ class GradientInputGenerator:
             # scale provided input seed for model
             seed = model.x_scaler.transform(seed)
 
-        # set target objective for pgd
-        if objective == ">":
+        # set target op for pgd
+        if op == ">":
             # make larger
             target = 1 if target == 0 else target
-            target_objective = target * self.objective_scaler
-        elif objective == "<":
+            target_op = target * self.op_scaler
+        elif op == "<":
             # make smaller
             target = 1 if target == 0 else target
-            target_objective = target * -self.objective_scaler
-        elif objective == "==":
+            target_op = target * -self.op_scaler
+        elif op == "==":
             # equal the target value
-            target_objective = target
+            target_op = target
         else:
-            raise ValueError("Unhandled objective!")
+            raise ValueError("Unhandled op!")
 
-        target = torch.full((1, model.output_size), target_objective)
+        target = torch.full((1, model.output_size), target_op)
 
         # loss function + target transform based on model output 
         if model.output_size == 1:
@@ -379,11 +379,15 @@ if __name__ == '__main__':
         model.y_scaler = dg.y_scaler
 
     # generate target input
-    target = 100
-    objective = "=="
+    t_ops = [
+        (0, ">"),
+        (0, "<"),
+        (72, "==")
+    ]
+    generator = GradientInputGenerator()
+    for target, op in t_ops:
+        x_adv = generator(model, target, op)
 
-    x_adv = GradientInputGenerator()(model, target, objective)
-
-    print('x_adv:', x_adv)
-    print('target:', target)
-    print('fn(x_adv):', fn(*x_adv))
+        print('target:', target, "op:", op)
+        print('x_adv:', x_adv)
+        print('fn(x_adv):', fn(*x_adv))
