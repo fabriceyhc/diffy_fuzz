@@ -36,13 +36,15 @@ class GradientInputGenerator:
 
         # set target objective for pgd
         if objective == ">":
-            # --> make larger
+            # make larger
+            target = 1 if target == 0 else target
             target_objective = target * self.objective_scaler
         elif objective == "<":
-            # --> make smaller
-            target_objective = target / self.objective_scaler
+            # make smaller
+            target = 1 if target == 0 else target
+            target_objective = target * -self.objective_scaler
         elif objective == "==":
-            # --> equal the target value
+            # equal the target value
             target_objective = target
         else:
             raise ValueError("Unhandled objective!")
