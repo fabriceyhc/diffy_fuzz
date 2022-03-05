@@ -29,7 +29,7 @@ TODO: Aish, describe your approach and provide runnable code snippet. Include da
 
 ### Function Approximation
 
-Once we have identified the blocking code, we must then approximate it differentiably. For this we use a shallow 2-layer neural network implemented in PyTorch (`FunctionApproximator`). To generate the data necessary to train the model, we pass the blocking code to our `DatasetGenerator`, which performs the following steps:
+Once we have identified the blocking code, we must then approximate it differentiably. For this we use a shallow 2-layer neural network implemented in PyTorch (`FuncApproximator`). To generate the data necessary to train the model, we pass the blocking code to our `DatasetGenerator`, which performs the following steps:
 
 1. Inspects the function `argspecs`
 2. Uses either `torch.linspace` or `pyfuzz` to generate inputs
