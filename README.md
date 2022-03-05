@@ -64,13 +64,13 @@ For example, the following command yields:
 |4|pythagorean\_fn|continous|0\.01103|NA|1\.61|
 |5|fahrenheit\_to_celcius_fn|continous|0\.00041|NA|1\.61|
 |6|dl\_textbook_fn|continous|0\.00299|NA|1\.61|
-|7|square\_disc_fn|discontinous|1\.36842e-06|1|1\.62|
-|8|log\_disc_fn|discontinous|0\.00073|1|1\.63|
-|9|neuzz\_fn|discontinous|1\.28657e-05|1|1\.61|
+|7|square\_disc_fn|discontinous|1\.36842e-06|1.0|1\.62|
+|8|log\_disc_fn|discontinous|0\.00073|1.0|1\.63|
+|9|neuzz\_fn|discontinous|1\.28657e-05|1.0|1\.61|
 |10|fahrenheit\_to_celcius_disc_fn|discontinous|0\.26717|0\.91|1\.60|
-|11|log\_sin_fn|discontinous|2\.69615e-06|1|1\.60|
-|12|f\_of_g_fn|discontinous|1\.43994e-06|1|1\.66|
-|13|arcsin\_sin_fn|discontinous|7\.15119e-06|1|1\.62|
+|11|log\_sin_fn|discontinous|2\.69615e-06|1.0|1\.60|
+|12|f\_of_g_fn|discontinous|1\.43994e-06|1.0|1\.66|
+|13|arcsin\_sin_fn|discontinous|7\.15119e-06|1.0|1\.62|
 
 ![sin_fn](/imgs/sin_fn.png?raw=true) ![square_fn](/imgs/square_fn.png?raw=true) ![log_fn](/imgs/log_fn.png?raw=true) ![poly_fn](/imgs/poly_fn.png?raw=true)          ![fahrenheit_to_celcius_fn](/imgs/fahrenheit_to_celcius_fn.png?raw=true) ![dl_textbook_fn](/imgs/dl_textbook_fn.png?raw=true)
 
