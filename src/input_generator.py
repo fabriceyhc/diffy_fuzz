@@ -13,7 +13,7 @@ class GradientInputGenerator:
                  eps_iter=0.1, 
                  nb_iter=1000, 
                  norm=2,
-                 op_scaler=100):
+                 op_scaler=255):
       
         self.eps = eps
         self.eps_iter = eps_iter
@@ -382,7 +382,7 @@ if __name__ == '__main__':
     t_ops = [
         (0, ">"),
         (0, "<"),
-        (72, "==")
+        (100, "==")
     ]
     generator = GradientInputGenerator()
     for target, op in t_ops:
