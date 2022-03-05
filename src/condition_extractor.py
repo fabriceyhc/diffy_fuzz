@@ -1,10 +1,15 @@
-from fuzzer import *
+import ast
+import astor
+import inspect
+
+from uncovered_branches_extractor import *
 
 class FunctionAndBranchConditionsExtractor():
     """Extract function for dataset generation and condition components"""
 
-    def __init__(self):
+    def __init__(self, sub_program):
         self.var_map = {}
+        self.sub_program = sub_program
 
     def collectVariables(self, tree):
         """Explores the AST and stores function assignment in a dictionary"""
@@ -34,7 +39,7 @@ class FunctionAndBranchConditionsExtractor():
         conditionComponents = []
         self.collectVariables(tree)
         """Extract uncovered branches"""
-        branches_uncovered = symfz_ct.collect_uncovered_branches()
+        branches_uncovered = self.sub_program.collect_uncovered_branches()
         branches = [b for b, _ in branches_uncovered]
 
         def traverse(node):
@@ -52,9 +57,9 @@ class FunctionAndBranchConditionsExtractor():
 if __name__ == '__main__':
 
     """Source AST generation for subject program fun"""
-    source_ast = ast.parse(inspect.getsource(fun))
+    source_ast = ast.parse(inspect.getsource(program_1))
 
-    funCondExtractor = FunctionAndBranchConditionsExtractor()
+    funCondExtractor = FunctionAndBranchConditionsExtractor(symfz_ct_program_1)
 
     """Pass the function ast to extract branch conditions and target function"""
     funCondExtractor.collect_conditionComponents(source_ast)
