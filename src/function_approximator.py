@@ -45,8 +45,16 @@ class FuncApproximator(LightningModule):
     def training_step(self, batch, batch_idx):
         x, y = batch
         out = self(x)
-        loss = self.loss_fn(out, y)
-        return loss
+        train_loss = self.loss_fn(out, y)
+
+        # log step metric
+        self.log("train_loss", train_loss)
+
+        if self.output_size > 1:
+            self.accuracy(out, y)
+            self.log('train_acc', self.accuracy)
+
+        return train_loss
 
     def training_epoch_end(self, outs):
         # log epoch metric
@@ -68,9 +76,9 @@ class FuncApproximator(LightningModule):
     def test_step(self, batch, batch_idx):
         x, y = batch
         out = self(x)
+        test_loss = self.loss_fn(out, y)
         
         # log step metric
-        test_loss = self.loss_fn(out, y)
         self.log("test_loss", test_loss)
         
         if self.output_size > 1:
@@ -131,6 +139,8 @@ if __name__ == '__main__':
     import seaborn as sns
     import matplotlib.pyplot as plt
     from pytorch_lightning import Trainer
+    from pytorch_lightning import loggers as pl_loggers
+    from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
     from subject_programs.functions_to_approximate import *
     from dataset_generator import *
@@ -169,10 +179,17 @@ if __name__ == '__main__':
             model = FuncApproximator(
                 input_size=dg.num_inputs,
                 output_size=dg.num_outputs)
-           
+            
+            tb_logger = pl_loggers.TensorBoardLogger("./logs/", name=fn.__name__)
+            escb = EarlyStopping(monitor="train_loss", min_delta=0.00, patience=2, verbose=False, mode="min")
+
             trainer = Trainer(
                 max_epochs=3,
-                gpus=torch.cuda.device_count()
+                gpus=torch.cuda.device_count(),
+                logger=tb_logger,
+                log_every_n_steps=1,
+                flush_logs_every_n_steps=1,
+                callbacks=[escb]
             )
 
             tic = time.perf_counter()
