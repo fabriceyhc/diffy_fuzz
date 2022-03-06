@@ -2,7 +2,17 @@
 
 DiffyFuzz is a novel testing tool that approximates program logic differentiably so that inputs can be crafted to access tricky branches. 
 
-This tool can be used directly or incorporated as an extension to other techniques, like symbolic and concolic execution. When the base tool can no longer improve coverage statistics, DiffyFuzz activates to expand coverage for numerically guarded branches. 
+This tool can be used directly or incorporated as an extension to other techniques, like symbolic and concolic execution. When the base tool can no longer improve coverage statistics, DiffyFuzz activates to expand coverage for numerically guarded branches.
+
+## Installation
+
+Our code runs on Python 3.9.7 specifically, but should be fine with any subversion within 3.9 (we experienced some issues with 3.10 and pytorch). 
+
+You'll also need to install various dependencies:
+
+```
+> pip install -r requirements.txt
+```
 
 ## How does it work?
 
