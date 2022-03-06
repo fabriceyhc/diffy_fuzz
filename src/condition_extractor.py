@@ -57,9 +57,9 @@ class FunctionAndBranchConditionsExtractor():
 if __name__ == '__main__':
 
     """Source AST generation for subject program fun"""
-    source_ast = ast.parse(inspect.getsource(program_1))
+    source_ast = ast.parse(inspect.getsource(program_14))
 
-    funCondExtractor = FunctionAndBranchConditionsExtractor(symfz_ct_program_1)
+    funCondExtractor = FunctionAndBranchConditionsExtractor(symfz_ct)
 
     """Pass the function ast to extract branch conditions and target function"""
     funCondExtractor.collect_conditionComponents(source_ast)
