@@ -19,7 +19,7 @@ Additional details for each phase can be seen in this flow chart and in the foll
 
 ![DiffyFuzz Overview](/imgs/overview.png?raw=true)
 
-### Initializing the coverage profile
+### Initializing a coverage profile
 
 TODO: Apoorv, describe your approach and provide runnable code snippet. Include data you provide to step 2 for Aish.
 
@@ -76,7 +76,7 @@ For example, the following command yields:
 
 As you can see, some functions are not especially well approximated. The `sin_fn` is particularly challenging for neural networks and in the future we may want to incorporate fallback approximators such as a [taylor polynomial](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.approximate_taylor_polynomial.html). Other functions, like the `log_fn`, are well approximated only for certain ranges of the input space, but may still provide enough guidance for gradient optimization to solve coarse-grained inequality constraints. 
 
-### Generating Inputs
+### Generating Targeted Inputs
 
 Now that we have a fitted approximator, we can use gradient-optimization techniques to generate an input that satisfies the constraints for the uncovered branches. For this, we repurpose a projected gradient descent (PGD) algorithm originally developed for adversarial attacks. The attack is unbounded so that the seed input can be perturbed as far as necessary to generate the target inputs. 
 
