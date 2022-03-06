@@ -345,6 +345,8 @@ def projected_gradient_descent(
 if __name__ == '__main__':
 
     from pytorch_lightning import Trainer
+    from pytorch_lightning import loggers as pl_loggers
+    from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
     from subject_programs.functions_to_approximate import fahrenheit_to_celcius_fn
     from dataset_generator import *
@@ -366,9 +368,16 @@ if __name__ == '__main__':
         input_size=dg.num_inputs,
         output_size=dg.num_outputs)
 
+    tb_logger = pl_loggers.TensorBoardLogger("./logs/", name=fn.__name__)
+    escb = EarlyStopping(monitor="train_loss", min_delta=0.00, patience=2, verbose=False, mode="min")
+
     trainer = Trainer(
         max_epochs=3,
-        gpus=torch.cuda.device_count()
+        gpus=torch.cuda.device_count(),
+        logger=tb_logger,
+        # log_every_n_steps=1,
+        # flush_logs_every_n_steps=1,
+        callbacks=[escb]
     )
     trainer.fit(model, train_loader)
     # trainer.test(model, test_loader)
