@@ -25,7 +25,35 @@ TODO: Apoorv, describe your approach and provide runnable code snippet. Include 
 
 ### Identifying blocking code
 
-TODO: Aish, describe your approach and provide runnable code snippet. Include data you provide to step 3-4 for Fabrice.
+Once we have analyzed the coverage profile and identified uncovered branches, we can extract condition components and target function to be used for dataset generation. In order to do this, we perform the following steps:
+
+1. Parse the function AST for subject programs.
+2. Use `ast` module for generating source AST. 
+3. Traverse the AST and store function assignments in a dictionary.
+4. Extract branch conditions corresponding to the identified uncovered branches. 
+5. Map the target variable to corresponding function assignment by looking up the dictionary.
+
+The approach can be described as follows:
+
+1. First we generate source ast of subject program using
+```
+ast.parse(inspect.getsource(fun))
+```
+2. We use `astpretty` module to display the ast in an indented, readable format using
+```
+astpretty.pprint(source_ast, indent=4, show_offsets=True)
+```
+3. We store the function assignments in a dictionary using `collectVariables` method. This method takes in the source AST and returns the updated dictionary.
+
+4. By using the line numbers of uncovered branches, we extract branch conditions for these branches. In addition, we map the target variable in these conditions to its corresponding function asssignment by performing a dictionary lookup using the `extractVariables` method. The branch conditions and target function are returned as a dictionary by the `collect_conditionComponents` method. 
+
+For Example, for the demo y = math.sin(x) function, this method returns:
+```
+[{'target_fn': 'math.sin(x)', 'branch_conditions': '(y > 0)'},
+ {'target_fn': 'math.sin(x)', 'branch_conditions': '(y < 0)'},
+ {'target_fn': 'math.sin(x)', 'branch_conditions': '(round(y, 6) == 0.757575)'}]
+ ```
+The output from this function will be passed to the dataset generator. 
 
 ### Function Approximation
 
