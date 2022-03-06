@@ -72,7 +72,7 @@ For example, the following command yields:
 |12|f\_of_g_fn|discontinous|1\.43994e-06|1.0|1\.66|
 |13|arcsin\_sin_fn|discontinous|7\.15119e-06|1.0|1\.62|
 
-![sin_fn](/imgs/approx/sin_fn.png?raw=true) ![square_fn](/imgs/approx/square_fn.png?raw=true) ![log_fn](/imgs/approx/log_fn.png?raw=true) ![poly_fn](/imgs/poly_fn.png?raw=true)          ![fahrenheit_to_celcius_fn](/imgs/approx/fahrenheit_to_celcius_fn.png?raw=true) ![dl_textbook_fn](/imgs/approx/dl_textbook_fn.png?raw=true)
+![sin_fn](/imgs/approx/sin_fn.png?raw=true) ![square_fn](/imgs/approx/square_fn.png?raw=true) ![log_fn](/imgs/approx/log_fn.png?raw=true) ![poly_fn](/imgs/approx/poly_fn.png?raw=true)          ![fahrenheit_to_celcius_fn](/imgs/approx/fahrenheit_to_celcius_fn.png?raw=true) ![dl_textbook_fn](/imgs/approx/dl_textbook_fn.png?raw=true)
 
 As you can see, some functions are not especially well approximated. The `sin_fn` is particularly challenging for neural networks and in the future we may want to incorporate fallback approximators such as a [taylor polynomial](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.approximate_taylor_polynomial.html). Other functions, like the `log_fn`, are well approximated only for certain ranges of the input space, but may still provide enough guidance for gradient optimization to solve coarse-grained inequality constraints. 
 
