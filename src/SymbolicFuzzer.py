@@ -181,7 +181,6 @@ class SimpleSymbolicFuzzer(Fuzzer):
         self.conditions_covered = {}
         self.branches = []
         self.branches_uncovered = []
-        self.precision = 6
         self.options(kwargs)
         self.process()
 
@@ -189,6 +188,8 @@ class SimpleSymbolicFuzzer(Fuzzer):
         self.max_depth = kwargs.get('max_depth', MAX_DEPTH)
         self.max_tries = kwargs.get('max_tries', MAX_TRIES)
         self.max_iter = kwargs.get('max_iter', MAX_ITER)
+        self.precision = kwargs.get('precision', 6)
+        self.external_func_length = kwargs.get('external_func_length', 0)
         self._options = kwargs
     def get_all_paths(self, fenter):
         path_lst = [PNode(0, fenter)]
@@ -288,9 +289,13 @@ class SimpleSymbolicFuzzer(Fuzzer):
             args = self.fuzz()
             global coverage
             coverage = []
+            # print(args['x'], "this is x", 'x' in args)
+            if not 'x' in args:
+                continue
             sys.settrace(traceit)  # Turn on
             self.func(float(args['x']))
-            sys.settrace(None) 
+            sys.settrace(None)
+            # print(coverage)
             for j in range(len(coverage)):
                 if coverage[j][0] in self.branches:
                     #next line is executed
@@ -302,11 +307,14 @@ class SimpleSymbolicFuzzer(Fuzzer):
         self.collect_uncovered_branches()
     
     def collect_uncovered_branches(self):
+        self.branches_uncovered = []
         for key, value in self.conditions_covered.items():
             # print(key.split('~'), value)
             if not value:
-                branch_uncovered = [int(key.split('~')[0]), int(key.split('~')[1])]
-                self.branches_uncovered.append(branch_uncovered)
+                line_no = int(key.split('~')[0]) - self.external_func_length
+                if line_no > 0:
+                    branch_uncovered = [line_no, int(key.split('~')[1])]
+                    self.branches_uncovered.append(branch_uncovered)
                    
 def traceit(frame: FrameType, event: str, arg: Any) -> Optional[Callable]:
         """Trace program execution. To be passed to sys.settrace()."""

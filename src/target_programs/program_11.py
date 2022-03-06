@@ -1,26 +1,38 @@
-import argparse
-
-from functions_to_approximate import neuzz_fn
-
-if __name__ == '__main__':
-
-   parser = argparse.ArgumentParser()
-   parser.add_argument("--input", nargs='+', type=float, help="values to pass into neuzz_fn()")
-   args = parser.parse_args()
-
-   x = args.input
-
-   if not args.input:
-      x = input("Enter two values (separated by a space) for neuzz_fn(x):").split()
-      x = [float(x_) for x_ in x]
-
-   y = neuzz_fn(*x)
-   
+def program_11_sym(x: float):
+   z:float = 3**x
+   y:float = 0
+   if z < 1:
+      y = 0
+   elif z < 2:
+      y = 1
+   elif z < 4:
+      y = 2
+   else:
+      y = 3
+   r:float = 0.0
    if y == 0:
-      print("neuzz_fn: 0!")
-   if y == 1:
-      print("neuzz_fn: 1!")
-   if y == 2:
-      print("neuzz_fn: 2!")
-   if y == 3:
-      print("neuzz_fn: 3!")
+      r = 1.75
+   elif y == 1:
+      r = 0.633
+   elif y == 2:
+      r = 4.432
+   elif y == 3:
+      r = 423.2332
+   
+   return r
+
+from target_programs.functions_to_approximate import neuzz_fn
+
+def program_11(x: float):
+   y:int = neuzz_fn(x)
+   r:float = 0.0
+   if y == 0:
+      r = 1.75
+   elif y == 1:
+      r = 0.633
+   elif y == 2:
+      r = 4.432
+   elif y == 3:
+      r = 423.2332
+   
+   return r

@@ -88,8 +88,8 @@ def log_disc_fn(x):
     else:
         return 1
 
-def neuzz_fn(a, b):
-    z = math.pow(3, a + b)
+def neuzz_fn(x):
+    z = math.pow(3, x)
     if z < 1:
         return 0
     elif z < 2:
@@ -103,7 +103,7 @@ def fahrenheit_to_celcius_disc_fn(x):
     c = (5/9) * (x-32)
     if c < 0:
         return 0
-    elif 0 <= c < 100:
+    elif c < 100:
         return 1
     else:
         return 2

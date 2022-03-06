@@ -1,27 +1,33 @@
-import argparse
-
-from functions_to_approximate import fahrenheit_to_celcius_fn
-
-if __name__ == '__main__':
-
-   parser = argparse.ArgumentParser()
-   parser.add_argument("--input", type=float, help="value to pass into fahrenheit_to_celcius_fn()")
-   args = parser.parse_args()
-
-   x = args.input
-
-   if not args.input:
-      x = float(input("Enter a numeric value for fahrenheit_to_celcius_fn(x):"))
-
-   y = fahrenheit_to_celcius_fn(x)
-   
+def program_6_sym(x: float):
+   y:float = (5/9) * (x-32)
+   r:float = 0.0
    if y > 0:
-      print("You've got water!")
+      r = 1.75
    elif y < 0:
-      print("You've got ice!")
+      r = 0.633
    else:
-      print("You also have ice!")
+      r = 322.22
 
-   # x ~ 212
+   # x ~ 0.8595900002387481
+   if y == 100:
+      r = 1.0
+   
+   return r
+
+from target_programs.functions_to_approximate import fahrenheit_to_celcius_fn
+
+def program_6(x: float):
+   y:float = fahrenheit_to_celcius_fn(x)
+   r:float = 0.0
+   if y > 0:
+      r = 1.75
+   elif y < 0:
+      r = 0.633
+   else:
+      r = 322.22
+
+   # x ~ 0.8595900002387481
    if round(y, 0) == 100:
-      raise Exception("You found a hard-to-reach bug (and steam)!")
+      r = 1.0
+   
+   return r
