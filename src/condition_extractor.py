@@ -14,8 +14,8 @@ class FunctionAndBranchConditionsExtractor():
     def collectVariables(self, tree):
         """Explores the AST and stores function assignment in a dictionary"""
         def traverse(node):
-            if isinstance(node, ast.Assign):
-                self.var_map[node.targets[0].id] = node
+            if isinstance(node, ast.AnnAssign):
+                self.var_map[node.target.id] = node
             for child in ast.iter_child_nodes(node):
                 traverse(child)
         traverse(tree)
@@ -24,7 +24,7 @@ class FunctionAndBranchConditionsExtractor():
     def extractVariables(self, tree):
         """Explores the AST and returns the function name used for variable assignment"""
         variables = []
-
+        print(self.var_map)
         def traverse(node):
             if isinstance(node, ast.Name):
                 if node.id in self.var_map:
@@ -39,8 +39,7 @@ class FunctionAndBranchConditionsExtractor():
         conditionComponents = []
         self.collectVariables(tree)
         """Extract uncovered branches"""
-        branches_uncovered = self.sub_program.collect_uncovered_branches()
-        branches = [b for b, _ in branches_uncovered]
+        branches = [b for b, _ in self.sub_program.branches_uncovered]
 
         def traverse(node):
             if isinstance(node, ast.If):
