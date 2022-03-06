@@ -10,3 +10,4 @@ z3-solver
 astor
 graphviz
 networkx
+pyan3
