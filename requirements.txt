@@ -6,3 +6,7 @@ pytorch-lightning
 torchmetrics 
 pyfuzz_tool 
 cleverhans
+z3-solver
+astor
+graphviz
+networkx
