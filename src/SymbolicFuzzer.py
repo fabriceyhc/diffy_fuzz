@@ -8,6 +8,7 @@ from Fuzzer import Fuzzer
 from ControlFlow import PyCFG
 from contextlib import contextmanager
 import sys
+import time
 from types import FrameType
 from typing import Any, Optional, Callable
 
@@ -285,6 +286,7 @@ class SimpleSymbolicFuzzer(Fuzzer):
             
     def start_execution(self, tries):
         self.collect_branch_conditions()
+        self.start_time = time.time()
         for i in range(0, tries):
             args = self.fuzz()
             global coverage
@@ -303,7 +305,7 @@ class SimpleSymbolicFuzzer(Fuzzer):
                         self.conditions_covered[str(coverage[j][0]) + "~1"] = True
                     else:
                         self.conditions_covered[str(coverage[j][0]) + "~0"] = True
-
+        self.execution_time = round(time.time() - self.start_time, 6)
         self.collect_uncovered_branches()
     
     def collect_uncovered_branches(self):
@@ -315,6 +317,15 @@ class SimpleSymbolicFuzzer(Fuzzer):
                 if line_no > 0:
                     branch_uncovered = [line_no, int(key.split('~')[1])]
                     self.branches_uncovered.append(branch_uncovered)
+
+    def calculate_branch_coverage(self):
+        self.collect_uncovered_branches()
+        num_of_branches = 0
+        for i in self.branches:
+            if i - self.external_func_length > 1:
+                num_of_branches+=1
+        num_of_branches*=2
+        return round((num_of_branches - len(self.branches_uncovered))/num_of_branches * 100,2)
                    
 def traceit(frame: FrameType, event: str, arg: Any) -> Optional[Callable]:
         """Trace program execution. To be passed to sys.settrace()."""
