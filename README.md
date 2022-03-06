@@ -116,8 +116,8 @@ The following code runs through a full example where the target function is `fah
 This trains a model, then uses PGD to arrive at a value that accesses the branch and will discover the bug!
 
 ```
+op: == target: 100
 x_adv: tensor([[212.2676]])
-target: 100
 fn(x_adv): tensor([100.1487])
 ```
 Running the program with this value results in:
