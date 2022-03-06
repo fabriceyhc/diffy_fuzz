@@ -33,3 +33,5 @@ if __name__ == '__main__':
     symfz_ct = SimpleSymbolicFuzzer(program_14_sym, precision = 0, external_func_length = 5)
     symfz_ct.start_execution(tries=100)
     print(symfz_ct.branches_uncovered)
+    print(symfz_ct.execution_time, "seconds")
+    print(symfz_ct.calculate_branch_coverage(), "%")
