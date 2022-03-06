@@ -72,6 +72,8 @@ def declarations(astnode, hm=None):
             declarations(b, hm)
     elif isinstance(astnode, ast.Return):
         pass
+    elif isinstance(astnode, ast.Raise):
+        pass
     else:
         raise Exception(str(astnode))
     return hm
@@ -295,7 +297,10 @@ class SimpleSymbolicFuzzer(Fuzzer):
             if not 'x' in args:
                 continue
             sys.settrace(traceit)  # Turn on
-            self.func(float(args['x']))
+            try:
+                self.func(float(args['x']))
+            except:
+                pass
             sys.settrace(None)
             # print(coverage)
             for j in range(len(coverage)):
