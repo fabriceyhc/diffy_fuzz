@@ -24,7 +24,7 @@ class FunctionAndBranchConditionsExtractor():
     def extractVariables(self, tree):
         """Explores the AST and returns the function name used for variable assignment"""
         variables = []
-        print(self.var_map)
+        
         def traverse(node):
             if isinstance(node, ast.Name):
                 if node.id in self.var_map:
