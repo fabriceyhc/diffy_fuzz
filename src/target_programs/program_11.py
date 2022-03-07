@@ -1,6 +1,6 @@
-def program_11_sym(x: int):
-   z:int = 3**x
-   y:int = 0
+def program_11_sym(x: float):
+   z:float = 3**x
+   y:float = 0
    if z < 1:
       y = 0
    elif z < 2:
@@ -23,8 +23,8 @@ def program_11_sym(x: int):
 
 from target_programs.functions_to_approximate import neuzz_fn
 
-def program_11(x: int):
-   y:int = neuzz_fn(x)
+def program_11(x: float):
+   y:float = neuzz_fn(x)
    r:float = 0.0
    if y == 0:
       r = 1.75

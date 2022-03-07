@@ -7,6 +7,7 @@ import inspect
 import astor
 from condition_extractor import FunctionAndBranchConditionsExtractor
 from target_programs.functions_to_approximate import *
+import time
 from input_generator import *
 from pytorch_lightning import Trainer
 from pytorch_lightning import loggers as pl_loggers
@@ -21,7 +22,7 @@ filename = 'final_results.csv'
 
 if __name__ == '__main__':
 
-    fields = ['Program Name', 'Tries', 'Branch Coverage(Symbolic)', 'Execution Time Symbolic(in seconds)', 'Branch Coverage(Func Approximator)'] 
+    fields = ['Subject Program', 'Function Name', 'Coverage(Symbolic)', 'Time Taken(Symbolic)', 'Coverage(Diffy Func)', 'Time Taken(Diffy Func)'] 
     rows = []
 
     configs = get_subject_programs_config()
@@ -48,9 +49,9 @@ if __name__ == '__main__':
         print(symfz_ct.calculate_branch_coverage())
         print(symfz_ct.branches_uncovered, "hey")
         row.append(target_program.__name__)
-        row.append(100)
+        row.append(config['func_name'])
         row.append(str(symfz_ct.calculate_branch_coverage())+'%')
-        row.append(str(symfz_ct.execution_time)+" seconds")
+        row.append(str(symfz_ct.execution_time)+" sec")
         print(row)
         if(len(symfz_ct.branches_uncovered) == 0):
             row.append('NA')
@@ -96,6 +97,7 @@ if __name__ == '__main__':
 
         fn = processed_conditionComponentsArray[0]['target_fn']
 
+        start_time = time.time()
         # train approximator
         dg = DatasetGenerator(fn)
 
@@ -129,14 +131,15 @@ if __name__ == '__main__':
         if 'y_scaler' in dg.__dict__:
             model.y_scaler = dg.y_scaler
 
-        generator = GradientInputGenerator(num_seeds=1)
-
+        generator = GradientInputGenerator(num_seeds=100)
+        execution_time = round(time.time() - start_time, 6)
         op_targets = []
         # print("hey", processed_conditionComponentsArray)
         for cond in processed_conditionComponentsArray[0]['branch_conditions']:
             arr = (cond['operator'], float(cond['target']))
             op_targets.append(arr)
 
+        #phase 4
         for op, target in op_targets:
             x_adv = generator(model=model, op=op, target=target)
 
@@ -148,6 +151,7 @@ if __name__ == '__main__':
             # else:
             #     print('fn(x_adv):', [fn(*x_) for x_ in x_adv])
         row.append(str(symfz_ct.calculate_branch_coverage())+'%')
+        row.append(str(execution_time)+" sec")
         rows.append(row)
     with open(filename, 'w') as csvfile: 
         # creating a csv writer object 

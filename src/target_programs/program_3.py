@@ -1,9 +1,6 @@
 from target_programs.functions_to_approximate import log_fn
 
-def program_3(x: float):
-   if x == 0:
-      x = 1e-30
-      
+def program_3(x: float):      
    y:float = log_fn(x)
    
    if y > 0:
