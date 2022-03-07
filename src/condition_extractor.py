@@ -59,10 +59,11 @@ class FunctionAndBranchConditionsExtractor():
 
     def process_branchConditions(self, branchCondition):
         "Extract operand and target from branch conditions"
-        branchCondition = branchCondition.replace("(","").replace(")","")
+        branchCondition = branchCondition[1:-1]
+        branchConditionArray = []
         branchConditionArray = branchCondition.split()
-        branchConditionArray.pop(0)
-        return branchConditionArray
+        branchConditionArrayUpdated = [branchConditionArray[len(branchConditionArray) - 2], branchConditionArray[len(branchConditionArray) - 1]]
+        return branchConditionArrayUpdated
 
 
 if __name__ == '__main__':
