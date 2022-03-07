@@ -13,18 +13,18 @@ class GradientInputGenerator:
                  eps_iter=0.1, 
                  nb_iter=1000, 
                  norm=2,
-                 op_scaler=255):
+                 target_scaler=255):
       
         self.eps = eps
         self.eps_iter = eps_iter
         self.nb_iter = nb_iter
         self.norm = norm
-        self.op_scaler = op_scaler
+        self.target_scaler = target_scaler
 
     def __call__(self, 
                  model,
-                 target,
                  op,
+                 target,
                  seed=None):
       
         if not seed:
@@ -35,21 +35,21 @@ class GradientInputGenerator:
             seed = model.x_scaler.transform(seed)
 
         # set target op for pgd
-        if op == ">":
+        if op == ">" or op == ">=":
             # make larger
-            target = 1 if target == 0 else target
-            target_op = target * self.op_scaler
-        elif op == "<":
+            target = 1. if target == 0 else target
+            target = target * self.target_scaler
+        elif op == "<" or op == "<=":
             # make smaller
-            target = 1 if target == 0 else target
-            target_op = target * -self.op_scaler
+            target = 1. if target == 0 else target
+            target = target * -self.target_scaler
         elif op == "==":
             # equal the target value
-            target_op = target
+            target = target
         else:
             raise ValueError("Unhandled op!")
 
-        target = torch.full((1, model.output_size), target_op)
+        target = torch.full((1, 1), target)
 
         # loss function + target transform based on model output 
         if model.output_size == 1:
@@ -167,7 +167,7 @@ def fast_gradient_method(
 
     # Add perturbation to original example to obtain adversarial example
     adv_x = x + optimal_perturbation
-    # print(x, optimal_perturbation, out, loss)
+    # print(adv_x, optimal_perturbation, out, loss)
 
     # If clipping is needed, reset all values outside of [clip_min, clip_max]
     if (clip_min is not None) or (clip_max is not None):
@@ -313,13 +313,14 @@ def projected_gradient_descent(
         )
 
         if early_stopping:
-            if adv_x in prev_advs:
+            if any([(adv_x.detach() == adv_p).all() for adv_p in prev_advs]):
                 eps_iter /= 2.
                 prev_advs.clear()
-                if eps_iter < 1e-10:
+                if eps_iter < 1e-6:
                     break
             else:
                 prev_advs.append(adv_x.detach())
+                # print(prev_advs)
 
         # Clipping perturbation eta to norm norm ball
         eta = adv_x - x
@@ -345,8 +346,10 @@ def projected_gradient_descent(
 if __name__ == '__main__':
 
     from pytorch_lightning import Trainer
+    from pytorch_lightning import loggers as pl_loggers
+    from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
-    from subject_programs.functions_to_approximate import fahrenheit_to_celcius_fn
+    from subject_programs.functions_to_approximate import *
     from dataset_generator import *
     from function_approximator import *
 
@@ -366,9 +369,16 @@ if __name__ == '__main__':
         input_size=dg.num_inputs,
         output_size=dg.num_outputs)
 
+    tb_logger = pl_loggers.TensorBoardLogger("./logs/", name=fn.__name__)
+    escb = EarlyStopping(monitor="train_loss", min_delta=0.00, patience=2, verbose=False, mode="min")
+
     trainer = Trainer(
         max_epochs=3,
-        gpus=torch.cuda.device_count()
+        gpus=torch.cuda.device_count(),
+        logger=tb_logger,
+        # log_every_n_steps=1,
+        # flush_logs_every_n_steps=1,
+        callbacks=[escb]
     )
     trainer.fit(model, train_loader)
     # trainer.test(model, test_loader)
@@ -379,15 +389,25 @@ if __name__ == '__main__':
         model.y_scaler = dg.y_scaler
 
     # generate target input
-    t_ops = [
-        (0, ">"),
-        (0, "<"),
-        (100, "==")
-    ]
-    generator = GradientInputGenerator()
-    for target, op in t_ops:
-        x_adv = generator(model, target, op)
+    if model.output_size == 1:
+        op_targets = [
+            (">", 0),
+            ("<", 0),
+            ("==", 100)
+        ]
+    else:  
+        op_targets = [
+            ("==", 0),
+            ("==", 1)
+        ]
 
-        print('target:', target, "op:", op)
+    generator = GradientInputGenerator()
+    for op, target in op_targets:
+        x_adv = generator(model=model, op=op, target=target)
+
+        print("op:", op, 'target:', target)
         print('x_adv:', x_adv)
-        print('fn(x_adv):', fn(*x_adv))
+        if model.input_size > 1:
+            print('fn(x_adv):', fn(*x_adv.numpy().tolist()[0]))
+        else:
+            print('fn(x_adv):', fn(*x_adv))

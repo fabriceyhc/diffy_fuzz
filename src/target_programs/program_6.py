@@ -10,7 +10,7 @@ def program_6_sym(x: float):
 
    # x ~ 0.8595900002387481
    if y == 100:
-      r = 1.0
+      raise Exception("You found a hard-to-reach bug (and steam)!")
    
    return r
 
@@ -28,6 +28,6 @@ def program_6(x: float):
 
    # x ~ 0.8595900002387481
    if round(y, 0) == 100:
-      r = 1.0
+      raise Exception("You found a hard-to-reach bug (and steam)!")
    
    return r

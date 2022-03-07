@@ -2,7 +2,17 @@
 
 DiffyFuzz is a novel testing tool that approximates program logic differentiably so that inputs can be crafted to access tricky branches. 
 
-This tool can be used directly or incorporated as an extension to other techniques, like symbolic and concolic execution. When the base tool can no longer improve coverage statistics, DiffyFuzz activates to expand coverage for numerically guarded branches. 
+This tool can be used directly or incorporated as an extension to other techniques, like symbolic and concolic execution. When the base tool can no longer improve coverage statistics, DiffyFuzz activates to expand coverage for numerically guarded branches.
+
+## Installation
+
+Our code runs on Python 3.9.7 specifically, but should be fine with any subversion within 3.9 (we experienced some issues with 3.10 and pytorch). 
+
+You'll also need to install various dependencies:
+
+```
+> pip install -r requirements.txt
+```
 
 ## How does it work?
 
@@ -19,7 +29,7 @@ Additional details for each phase can be seen in this flow chart and in the foll
 
 ![DiffyFuzz Overview](/imgs/overview.png?raw=true)
 
-### Initializing the coverage profile
+### Initializing a coverage profile
 
 TODO: Apoorv, describe your approach and provide runnable code snippet. Include data you provide to step 2 for Aish.
 
@@ -100,11 +110,11 @@ For example, the following command yields:
 |12|f\_of_g_fn|discontinous|1\.43994e-06|1.0|1\.66|
 |13|arcsin\_sin_fn|discontinous|7\.15119e-06|1.0|1\.62|
 
-![sin_fn](/imgs/sin_fn.png?raw=true) ![square_fn](/imgs/square_fn.png?raw=true) ![log_fn](/imgs/log_fn.png?raw=true) ![poly_fn](/imgs/poly_fn.png?raw=true)          ![fahrenheit_to_celcius_fn](/imgs/fahrenheit_to_celcius_fn.png?raw=true) ![dl_textbook_fn](/imgs/dl_textbook_fn.png?raw=true)
+![sin_fn](/imgs/approx/sin_fn.png?raw=true) ![square_fn](/imgs/approx/square_fn.png?raw=true) ![log_fn](/imgs/approx/log_fn.png?raw=true) ![poly_fn](/imgs/approx/poly_fn.png?raw=true)          ![fahrenheit_to_celcius_fn](/imgs/approx/fahrenheit_to_celcius_fn.png?raw=true) ![dl_textbook_fn](/imgs/approx/dl_textbook_fn.png?raw=true)
 
 As you can see, some functions are not especially well approximated. The `sin_fn` is particularly challenging for neural networks and in the future we may want to incorporate fallback approximators such as a [taylor polynomial](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.approximate_taylor_polynomial.html). Other functions, like the `log_fn`, are well approximated only for certain ranges of the input space, but may still provide enough guidance for gradient optimization to solve coarse-grained inequality constraints. 
 
-### Generating Inputs
+### Generating Targeted Inputs
 
 Now that we have a fitted approximator, we can use gradient-optimization techniques to generate an input that satisfies the constraints for the uncovered branches. For this, we repurpose a projected gradient descent (PGD) algorithm originally developed for adversarial attacks. The attack is unbounded so that the seed input can be perturbed as far as necessary to generate the target inputs. 
 
@@ -116,8 +126,8 @@ The following code runs through a full example where the target function is `fah
 This trains a model, then uses PGD to arrive at a value that accesses the branch and will discover the bug!
 
 ```
+op: == target: 100
 x_adv: tensor([[212.2676]])
-target: 100
 fn(x_adv): tensor([100.1487])
 ```
 Running the program with this value results in:
