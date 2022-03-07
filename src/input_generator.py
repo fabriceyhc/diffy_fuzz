@@ -405,7 +405,7 @@ if __name__ == '__main__':
             ("==", 1)
         ]
 
-    generator = GradientInputGenerator(num_seeds=100)
+    generator = GradientInputGenerator(num_seeds=10)
     for op, target in op_targets:
         x_adv = generator(model=model, op=op, target=target)
 
