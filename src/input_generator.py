@@ -13,13 +13,15 @@ class GradientInputGenerator:
                  eps_iter=0.1, 
                  nb_iter=1000, 
                  norm=2,
-                 target_scaler=255):
+                 target_scaler=255,
+                 num_seeds=1):
       
         self.eps = eps
         self.eps_iter = eps_iter
         self.nb_iter = nb_iter
         self.norm = norm
         self.target_scaler = target_scaler
+        self.num_seeds = num_seeds
 
     def __call__(self, 
                  model,
@@ -29,7 +31,7 @@ class GradientInputGenerator:
       
         if not seed:
             # create default seed at midpoint in input space [0,1]
-            seed = torch.full((1, model.input_size), 0.5)
+            seed = torch.rand((self.num_seeds, model.input_size))
         else:
             # scale provided input seed for model
             seed = model.x_scaler.transform(seed)
@@ -49,11 +51,13 @@ class GradientInputGenerator:
         else:
             raise ValueError("Unhandled op!")
 
-        target = torch.full((1, 1), target)
+        target = torch.full((self.num_seeds, 1), target) 
 
         # loss function + target transform based on model output 
         if model.output_size == 1:
             loss_fn = F.l1_loss  
+            if op != "==":
+                target *= torch.rand_like(target)
             target  = model.y_scaler.transform(target)
         else:
             loss_fn = F.cross_entropy
@@ -391,9 +395,9 @@ if __name__ == '__main__':
     # generate target input
     if model.output_size == 1:
         op_targets = [
-            (">", 0),
-            ("<", 0),
-            ("==", 100)
+            (">", 0.),
+            ("<", 0.),
+            ("==", 100.)
         ]
     else:  
         op_targets = [
@@ -401,13 +405,13 @@ if __name__ == '__main__':
             ("==", 1)
         ]
 
-    generator = GradientInputGenerator()
+    generator = GradientInputGenerator(num_seeds=100)
     for op, target in op_targets:
         x_adv = generator(model=model, op=op, target=target)
 
         print("op:", op, 'target:', target)
         print('x_adv:', x_adv)
         if model.input_size > 1:
-            print('fn(x_adv):', fn(*x_adv.numpy().tolist()[0]))
+            print('fn(x_adv):', [fn(*x_.numpy().tolist()[0]) for x_ in x_adv])
         else:
-            print('fn(x_adv):', fn(*x_adv))
+            print('fn(x_adv):', [fn(*x_) for x_ in x_adv])
