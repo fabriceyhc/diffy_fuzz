@@ -9,6 +9,7 @@ from ControlFlow import PyCFG
 from contextlib import contextmanager
 import sys
 import time
+import numpy
 from types import FrameType
 from typing import Any, Optional, Callable
 
@@ -73,6 +74,8 @@ def declarations(astnode, hm=None):
     elif isinstance(astnode, ast.Return):
         pass
     elif isinstance(astnode, ast.Raise):
+        pass
+    elif isinstance(astnode, ast.Expr):
         pass
     else:
         raise Exception(str(astnode))
@@ -186,6 +189,7 @@ class SimpleSymbolicFuzzer(Fuzzer):
         self.branches_uncovered = []
         self.options(kwargs)
         self.process()
+        self.execution_time = 0
 
     def options(self, kwargs):
         self.max_depth = kwargs.get('max_depth', MAX_DEPTH)
@@ -316,7 +320,7 @@ class SimpleSymbolicFuzzer(Fuzzer):
     def collect_uncovered_branches(self):
         self.branches_uncovered = []
         for key, value in self.conditions_covered.items():
-            # print(key.split('~'), value)
+            # print(key.split('~'), not value)
             if not value:
                 line_no = int(key.split('~')[0]) - self.external_func_length
                 if line_no > 0:
@@ -331,6 +335,65 @@ class SimpleSymbolicFuzzer(Fuzzer):
                 num_of_branches+=1
         num_of_branches*=2
         return round((num_of_branches - len(self.branches_uncovered))/num_of_branches * 100,2)
+
+    def preprocess_coverage(self,coverage):
+        new_coverage = []
+        first_occurence = -1
+        for cov in coverage:
+            if cov[1] == self.func.__name__:
+                # print("######", first_occurence)
+                if first_occurence == -1:
+                    first_occurence = cov[0]-2
+                    cov[0] = 2
+                else:
+                    cov[0] = cov[0]-first_occurence
+                new_coverage.append(cov)
+
+        return new_coverage
+
+    def collect_additional_covergae(self,inputs, size):
+
+        if size > 1:
+            for x_ in inputs:
+                global coverage
+                coverage = []
+                # print(args['x'], "this is x", 'x' in args)
+                sys.settrace(traceit)  # Turn on
+                try:
+                    t = self.func(*x_.numpy().tolist())
+                    print(t, "Dwdw")
+                except Exception as e:
+                    print("error", e)
+                sys.settrace(None)
+                # print(coverage)
+                for j in range(len(coverage)):
+                    if coverage[j][0] in self.branches:
+                        #next line is executed
+                        if j+1 < len(coverage) and coverage[j][0] + 1 == coverage[j+1][0]:
+                            self.conditions_covered[str(coverage[j][0]) + "~1"] = True
+                        else:
+                            self.conditions_covered[str(coverage[j][0]) + "~0"] = True
+        else:
+            for x_ in inputs:
+                coverage = []
+                # print(args['x'], "this is x", 'x' in args)
+                sys.settrace(traceit)  # Turn on
+                try:
+                    t = self.func(float(*x_))
+                    print(t, "Dwdw")
+                except Exception as e:
+                    print("error", e)
+                sys.settrace(None)
+                coverage = self.preprocess_coverage(coverage)
+                print(coverage)
+                for j in range(len(coverage)):
+                    if coverage[j][0] in self.branches:
+                        #next line is executed
+                        if j+1 < len(coverage) and coverage[j][0] + 1 == coverage[j+1][0]:
+                            self.conditions_covered[str(coverage[j][0]) + "~1"] = True
+                        else:
+                            self.conditions_covered[str(coverage[j][0]) + "~0"] = True
+
                    
 def traceit(frame: FrameType, event: str, arg: Any) -> Optional[Callable]:
         """Trace program execution. To be passed to sys.settrace()."""

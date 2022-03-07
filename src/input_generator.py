@@ -405,13 +405,13 @@ if __name__ == '__main__':
             ("==", 1)
         ]
 
-    generator = GradientInputGenerator(num_seeds=100)
+    generator = GradientInputGenerator(num_seeds=10)
     for op, target in op_targets:
         x_adv = generator(model=model, op=op, target=target)
 
         print("op:", op, 'target:', target)
         print('x_adv:', x_adv)
         if model.input_size > 1:
-            print('fn(x_adv):', [fn(*x_.numpy().tolist()[0]) for x_ in x_adv])
+            print('fn(x_adv):', [fn(*x_.numpy().tolist()) for x_ in x_adv])
         else:
             print('fn(x_adv):', [fn(*x_) for x_ in x_adv])

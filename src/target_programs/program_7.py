@@ -1,19 +1,7 @@
-import argparse
+from target_programs.functions_to_approximate import dl_textbook_fn
 
-from functions_to_approximate import dl_textbook_fn
-
-if __name__ == '__main__':
-
-   parser = argparse.ArgumentParser()
-   parser.add_argument("--input", type=float, help="value to pass into dl_textbook_fn()")
-   args = parser.parse_args()
-
-   x = args.input
-
-   if not args.input:
-      x = float(input("Enter a numeric value for dl_textbook_fn(x):"))
-
-   y = dl_textbook_fn(x)
+def program_7(x: float):
+   y:float = dl_textbook_fn(x)
    print(y)
    
    if y > 0:
