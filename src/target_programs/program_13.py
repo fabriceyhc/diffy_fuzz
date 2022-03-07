@@ -1,19 +1,7 @@
-import argparse
+from target_programs.functions_to_approximate import log_sin_fn
 
-from functions_to_approximate import log_sin_fn
-
-if __name__ == '__main__':
-
-   parser = argparse.ArgumentParser()
-   parser.add_argument("--input", type=float, help="value to pass into log_sin_fn()")
-   args = parser.parse_args()
-
-   x = args.input
-
-   if not args.input:
-      x = float(input("Enter a numeric value for log_sin_fn(x):"))
-
-   y = log_sin_fn(x)
+def program_13(x: float):
+   y:float = log_sin_fn(x)
    
    if y == 0:
       print("log_sin_fn: 0")

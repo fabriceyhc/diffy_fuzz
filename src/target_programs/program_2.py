@@ -9,7 +9,7 @@ def program_2_sym(x: float):
       r = 322.22
 
    # x ~ 0.8595900002387481
-   if y == 0.757575:
+   if y == 0.7:
       raise Exception("You found a hard-to-reach bug!")
    
    return r
@@ -26,7 +26,7 @@ def program_2(x: float):
       r = 322.22
 
    # x ~ 0.8595900002387481
-   if round(y, 6) == 0.757575:
+   if round(y, 1) == 0.7:
       raise Exception("You found a hard-to-reach bug!")
    
    return r
