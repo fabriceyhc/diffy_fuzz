@@ -43,14 +43,19 @@ if __name__ == '__main__':
             symfz_ct.start_execution(tries=100)
         else:
             symfz_ct.collect_branch_conditions()
-        
-        # print(symfz_ct.branches_uncovered)
+        # print(symfz_ct.conditions_covered)
+        # print(symfz_ct.branches)
         print(symfz_ct.calculate_branch_coverage())
+        print(symfz_ct.branches_uncovered, "hey")
         row.append(target_program.__name__)
         row.append(100)
         row.append(str(symfz_ct.calculate_branch_coverage())+'%')
         row.append(str(symfz_ct.execution_time)+" seconds")
-
+        print(row)
+        if(len(symfz_ct.branches_uncovered) == 0):
+            row.append('NA')
+            rows.append(row)
+            continue
         # phase 2
         """Source AST generation for subject program fun"""
         source_ast = ast.parse(inspect.getsource(target_program))
