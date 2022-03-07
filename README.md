@@ -19,7 +19,7 @@ You'll also need to install various dependencies:
 At a high-level, there are four primary phases to our approach:
 
 1. Run a simple fuzzing routine to initialize coverage profile
-2. Indentify blocking code logic that inhibits branch exploration 
+2. Identify blocking code logic that inhibits branch exploration 
 3. Approximate that functionality with a differentiable function (e.g. a neural network)
 4. Generate new tests view gradient-optimization (e.g. adversarial attack)
 
