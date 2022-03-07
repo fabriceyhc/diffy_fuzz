@@ -21,7 +21,7 @@ At a high-level, there are four primary phases to our approach:
 1. Run a simple fuzzing routine to initialize coverage profile
 2. Identify blocking code logic that inhibits branch exploration 
 3. Approximate that functionality with a differentiable function (e.g. a neural network)
-4. Generate new tests view gradient-optimization (e.g. adversarial attack)
+4. Generate new tests via gradient-optimization (e.g. adversarial attack)
 
 These generated inputs are specifically designed to satisfy uncovered branch conditions and improve coverage. 
 
