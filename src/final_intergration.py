@@ -18,11 +18,11 @@ from dataset_generator import *
 from function_approximator import *
 from legend import get_subject_programs_config
 
-filename = 'final_results.csv'
+filename = 'final_results-79.csv'
 
 if __name__ == '__main__':
 
-    fields = ['Subject Program', 'Function Name', 'Coverage(Symbolic)', 'Time Taken(Symbolic)', 'Coverage(Diffy Func)', 'Time Taken(Diffy Func)'] 
+    fields = ['Subject Program', 'Coverage(Symbolic)', 'Time Taken(Symbolic)', 'Coverage(Diffy Func)', 'Time Taken(Diffy Func), TimeCoverage'] 
     rows = []
 
     configs = get_subject_programs_config()
@@ -41,18 +41,19 @@ if __name__ == '__main__':
         symbolic_execution = config['symbolic']
         #check if symbolic execution can be performed
         if symbolic_execution:
-            symfz_ct.start_execution(tries=100)
+            symfz_ct.start_execution(tries=1000)
         else:
             symfz_ct.collect_branch_conditions()
         # print(symfz_ct.conditions_covered)
         # print(symfz_ct.branches)
-        print(symfz_ct.calculate_branch_coverage())
-        print(symfz_ct.branches_uncovered, "hey")
+        print(symfz_ct.time_coverage, "hey")
+        print(symfz_ct.calculate_total_branch_coverage())
+        # print(symfz_ct.branches_uncovered, "hey")
         row.append(target_program.__name__)
-        row.append(config['func_name'])
-        row.append(str(symfz_ct.calculate_branch_coverage())+'%')
+        # row.append(config['func_name'])
+        row.append(str(symfz_ct.calculate_total_branch_coverage())+'%')
         row.append(str(symfz_ct.execution_time)+" sec")
-        print(row)
+        print(row, symfz_ct.branches_uncovered)
         if(len(symfz_ct.branches_uncovered) == 0):
             row.append('NA')
             rows.append(row)
@@ -102,10 +103,10 @@ if __name__ == '__main__':
         dg = DatasetGenerator(fn)
 
         train_loader, test_loader = dg(
+            input_range = (-50, 50), 
             scaler=MinMaxScaler, 
             num_examples_per_arg = 1000, 
-            max_dataset_size = 1000, 
-            batch_size=10, 
+            batch_size=4, 
             fuzz_generate=False)
 
         model = FuncApproximator(
@@ -150,8 +151,10 @@ if __name__ == '__main__':
             #     print('fn(x_adv):', [fn(*x_.numpy().tolist()) for x_ in x_adv])
             # else:
             #     print('fn(x_adv):', [fn(*x_) for x_ in x_adv])
-        row.append(str(symfz_ct.calculate_branch_coverage())+'%')
+        print(symfz_ct.conditions_covered, "***************************")
+        row.append(str(symfz_ct.calculate_total_branch_coverage())+'%')
         row.append(str(execution_time)+" sec")
+        row.append(symfz_ct.time_coverage)
         rows.append(row)
     with open(filename, 'w') as csvfile: 
         # creating a csv writer object 

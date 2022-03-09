@@ -7,3 +7,5 @@ def program_5(x: float, y: float):
    # x ~ [0.5, 0.75]
    if round(z, 6) == 0.901388:
       raise Exception("You found a hard-to-reach bug!")
+
+   return 0

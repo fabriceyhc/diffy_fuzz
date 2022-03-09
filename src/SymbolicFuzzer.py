@@ -187,9 +187,12 @@ class SimpleSymbolicFuzzer(Fuzzer):
         self.conditions_covered = {}
         self.branches = []
         self.branches_uncovered = []
+        self.no_of_inputs = 0
         self.options(kwargs)
         self.process()
         self.execution_time = 0
+        self.time_coverage = [[0,0,0, True]]
+        self.start_time = 0
 
     def options(self, kwargs):
         self.max_depth = kwargs.get('max_depth', MAX_DEPTH)
@@ -272,6 +275,8 @@ class SimpleSymbolicFuzzer(Fuzzer):
 
         return {}
     def collect_branch_conditions(self):
+        if self.start_time == 0:
+            self.start_time = time.time()
         tree = ast.parse(inspect.getsource(self.func))
 #         print(tree, "fdfds")
         paths = []
@@ -293,11 +298,15 @@ class SimpleSymbolicFuzzer(Fuzzer):
     def start_execution(self, tries):
         self.collect_branch_conditions()
         self.start_time = time.time()
+        self.lap_time = time.time()
+        self.time_coverage = [[0,0,0, True]]
+        self.no_of_inputs = 0
         for i in range(0, tries):
             args = self.fuzz()
             global coverage
             coverage = []
-            # print(args['x'], "this is x", 'x' in args)
+            # print(args[', "this is x", 'x' in args)
+            # print(args)
             if not 'x' in args:
                 continue
             sys.settrace(traceit)  # Turn on
@@ -306,15 +315,26 @@ class SimpleSymbolicFuzzer(Fuzzer):
             except:
                 pass
             sys.settrace(None)
+            self.no_of_inputs+=1
+            new_branch_discovered = 0
             # print(coverage)
             for j in range(len(coverage)):
                 if coverage[j][0] in self.branches:
                     #next line is executed
                     if j+1 < len(coverage) and coverage[j][0] + 1 == coverage[j+1][0]:
-                        self.conditions_covered[str(coverage[j][0]) + "~1"] = True
+                        if self.conditions_covered[str(coverage[j][0]) + "~1"] == False:
+                            new_branch_discovered = True
+                            self.conditions_covered[str(coverage[j][0]) + "~1"] = True
                     else:
-                        self.conditions_covered[str(coverage[j][0]) + "~0"] = True
+                        if self.conditions_covered[str(coverage[j][0]) + "~0"] == False:
+                            new_branch_discovered = True
+                            self.conditions_covered[str(coverage[j][0]) + "~0"] = True
+            if new_branch_discovered:
+                new_branch_discovered = False
+                print("coming here", self.func.__name__)
+                self.time_coverage.append([self.calculate_total_branch_coverage(), round(time.time() - self.start_time, 6), self.no_of_inputs, True])
         self.execution_time = round(time.time() - self.start_time, 6)
+        self.time_coverage.append([self.calculate_total_branch_coverage(), self.execution_time, self.no_of_inputs, True])
         self.collect_uncovered_branches()
     
     def collect_uncovered_branches(self):
@@ -336,6 +356,29 @@ class SimpleSymbolicFuzzer(Fuzzer):
         num_of_branches*=2
         return round((num_of_branches - len(self.branches_uncovered))/num_of_branches * 100,2)
 
+    def collect_total_uncovered_branches(self):
+        self.total_branches_uncovered = []
+        self.branches_uncovered = []
+        for key, value in self.conditions_covered.items():
+            # print(key.split('~'), not value)
+            if not value:
+                line_no = int(key.split('~')[0]) - self.external_func_length
+                if line_no > 0:
+                    branch_uncovered = [line_no, int(key.split('~')[1])]
+                    self.branches_uncovered.append(branch_uncovered)
+        for key, value in self.conditions_covered.items():
+            # print(key.split('~'), not value)
+            if not value:
+                line_no = int(key.split('~')[0])
+                branch_uncovered = [line_no, int(key.split('~')[1])]
+                self.total_branches_uncovered.append(branch_uncovered)
+
+    def calculate_total_branch_coverage(self):
+        self.collect_total_uncovered_branches()
+        num_of_branches = len(self.branches)
+        num_of_branches*=2
+        return round((num_of_branches - len(self.total_branches_uncovered))/num_of_branches * 100,2)
+
     def preprocess_coverage(self,coverage):
         new_coverage = []
         first_occurence = -1
@@ -352,11 +395,13 @@ class SimpleSymbolicFuzzer(Fuzzer):
         return new_coverage
 
     def collect_additional_covergae(self,inputs, size):
-
+        if self.start_time == 0:
+            self.start_time = time.time()
         if size > 1:
             for x_ in inputs:
                 global coverage
                 coverage = []
+                new_branch_discovered = False
                 # print(args['x'], "this is x", 'x' in args)
                 sys.settrace(traceit)  # Turn on
                 try:
@@ -366,34 +411,53 @@ class SimpleSymbolicFuzzer(Fuzzer):
                     print("error", e)
                 sys.settrace(None)
                 # print(coverage)
+                coverage = self.preprocess_coverage(coverage)
                 for j in range(len(coverage)):
                     if coverage[j][0] in self.branches:
                         #next line is executed
                         if j+1 < len(coverage) and coverage[j][0] + 1 == coverage[j+1][0]:
-                            self.conditions_covered[str(coverage[j][0]) + "~1"] = True
+                            if self.conditions_covered[str(coverage[j][0]) + "~1"] == False:
+                                new_branch_discovered = True
+                                self.conditions_covered[str(coverage[j][0]) + "~1"] = True
                         else:
-                            self.conditions_covered[str(coverage[j][0]) + "~0"] = True
+                            if self.conditions_covered[str(coverage[j][0]) + "~0"] == False:
+                                new_branch_discovered = True
+                                self.conditions_covered[str(coverage[j][0]) + "~0"] = True
+                if new_branch_discovered:
+                    new_branch_discovered = False
+                    print("coming here", self.func.__name__)
+                    self.time_coverage.append([self.calculate_total_branch_coverage(), round(time.time() - self.start_time, 6), self.no_of_inputs, False])
         else:
             for x_ in inputs:
                 coverage = []
                 # print(args['x'], "this is x", 'x' in args)
+                new_branch_discovered = False
                 sys.settrace(traceit)  # Turn on
                 try:
                     t = self.func(float(*x_))
-                    # print(t, "Dwdw")
+                    print(t, "Dwdw")
                 except Exception as e:
                     print("error", e)
                 sys.settrace(None)
+                self.no_of_inputs += 1
                 coverage = self.preprocess_coverage(coverage)
-                # print(coverage)
+                print(coverage)
+                print(self.branches)
                 for j in range(len(coverage)):
                     if coverage[j][0] in self.branches:
                         #next line is executed
                         if j+1 < len(coverage) and coverage[j][0] + 1 == coverage[j+1][0]:
-                            self.conditions_covered[str(coverage[j][0]) + "~1"] = True
+                            if self.conditions_covered[str(coverage[j][0]) + "~1"] == False:
+                                new_branch_discovered = True
+                                self.conditions_covered[str(coverage[j][0]) + "~1"] = True
                         else:
-                            self.conditions_covered[str(coverage[j][0]) + "~0"] = True
-
+                            if self.conditions_covered[str(coverage[j][0]) + "~0"] == False:
+                                new_branch_discovered = True
+                                self.conditions_covered[str(coverage[j][0]) + "~0"] = True
+                if new_branch_discovered:
+                    new_branch_discovered = False
+                    print("coming here", self.func.__name__)
+                    self.time_coverage.append([self.calculate_total_branch_coverage(), round(time.time() - self.start_time, 6), self.no_of_inputs, False])
                    
 def traceit(frame: FrameType, event: str, arg: Any) -> Optional[Callable]:
         """Trace program execution. To be passed to sys.settrace()."""
