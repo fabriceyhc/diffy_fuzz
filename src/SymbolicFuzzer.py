@@ -361,7 +361,7 @@ class SimpleSymbolicFuzzer(Fuzzer):
                 sys.settrace(traceit)  # Turn on
                 try:
                     t = self.func(*x_.numpy().tolist())
-                    print(t, "Dwdw")
+                    # print(t, "Dwdw")
                 except Exception as e:
                     print("error", e)
                 sys.settrace(None)
@@ -380,7 +380,7 @@ class SimpleSymbolicFuzzer(Fuzzer):
                 sys.settrace(traceit)  # Turn on
                 try:
                     t = self.func(float(*x_))
-                    print(t, "Dwdw")
+                    # print(t, "Dwdw")
                 except Exception as e:
                     print("error", e)
                 sys.settrace(None)
