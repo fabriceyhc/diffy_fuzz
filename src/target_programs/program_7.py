@@ -4,7 +4,7 @@ def program_7(x: float):
     y:float = dl_textbook_fn(x)
 
     if round(y, 0) == 100:
-        raise Exception("You found a hard-to-reach bug!")
+        raise Exception("You found a hard-to-reach bug!", y)
 
     if y > 100:
         print("dl_textbook_fn(x) > 100!", y)
