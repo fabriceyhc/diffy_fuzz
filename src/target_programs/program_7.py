@@ -9,5 +9,6 @@ def program_7(x: float):
 
     if y > 100:
         return "dl_textbook_fn returned a value more than 100!"
-    elif y < 100:
+    
+    if y < 100:
         return "dl_textbook_fn returned a value less than 100!"
