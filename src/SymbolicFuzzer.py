@@ -385,7 +385,7 @@ class SimpleSymbolicFuzzer(Fuzzer):
                     print("error", e)
                 sys.settrace(None)
                 coverage = self.preprocess_coverage(coverage)
-                print(coverage)
+                # print(coverage)
                 for j in range(len(coverage)):
                     if coverage[j][0] in self.branches:
                         #next line is executed
