@@ -435,14 +435,14 @@ class SimpleSymbolicFuzzer(Fuzzer):
                 sys.settrace(traceit)  # Turn on
                 try:
                     t = self.func(float(*x_))
-                    print(t, "Dwdw")
+                    # print(t, "Dwdw")
                 except Exception as e:
                     print("error", e)
                 sys.settrace(None)
                 self.no_of_inputs += 1
                 coverage = self.preprocess_coverage(coverage)
-                print(coverage)
-                print(self.branches)
+                # print(coverage)
+                # print(self.branches)
                 for j in range(len(coverage)):
                     if coverage[j][0] in self.branches:
                         #next line is executed
